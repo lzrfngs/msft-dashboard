@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSFT DASHBOARD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --bg:            #080809;
+      --surface:       #0e0e10;
+      --surface-alt:   #121214;
+      --border:        #1c1c21;
+      --border-dim:    #161619;
+      --text-primary:  #e2e2e6;
+      --text-secondary:#8888a0;
+      --text-muted:    #58586e;
+      --accent:        #0078D4;
+      --accent-bright: #1a8fe0;
+      --accent-dim:    rgba(0,120,212,0.12);
+      --red:           #c8343a;
+      --red-dim:       rgba(200,52,58,0.12);
+      --font: 'Berkeley Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 12px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding: 12px;
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2px 10px;
+      margin-bottom: 1px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .header-title span {
+      color: var(--accent);
+    }
+
+    .header-meta {
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    /* ============================================================
+       GRID
+    ============================================================ */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto auto;
+      gap: 1px;
+      background: var(--border-dim);
+    }
+
+    /* ============================================================
+       PANELS
+    ============================================================ */
+    .panel {
+      background: var(--surface);
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-label {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Panel placement */
+    .panel-clocks { grid-column: 1 / -1; }
+    .panel-weather { grid-column: 1; }
+    .panel-stock   { grid-column: 2; }
+    .panel-mstime  { grid-column: 3; }
+    .panel-feed    { grid-column: 1 / 3; }
+    .panel-brand   { grid-column: 3; }
+
+    /* ============================================================
+       PANEL 1 — CLOCKS
+    ============================================================ */
+    .clocks-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border-dim);
+    }
+
+    .clock-cell {
+      background: var(--surface-alt);
+      padding: 10px 16px 14px;
+    }
+
+    .clock-city {
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .clock-time {
+      font-size: 38px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock-date {
+      font-size: 9px;
+      color: var(--text-secondary);
+      margin-top: 5px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ============================================================
+       PANEL 2 — WEATHER
+    ============================================================ */
+    .weather-main {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .weather-glyph {
+      font-size: 10.5px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+      white-space: pre;
+      font-family: var(--font);
+    }
+
+    .weather-data {
+      flex: 1;
+    }
+
+    .weather-temp {
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .weather-temp span {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .weather-desc {
+      font-size: 10px;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .weather-detail {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .weather-detail strong {
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* ============================================================
+       PANEL 3 — STOCK
+    ============================================================ */
+    .stock-price {
+      font-size: 36px;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stock-delta {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 14px;
+    }
+
+    .stock-delta.positive { color: var(--accent); }
+    .stock-delta.negative { color: var(--red); }
+    .stock-delta.flat     { color: var(--text-secondary); }
+
+    .stock-sparkline {
+      font-size: 10px;
+      letter-spacing: -0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      line-height: 1;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .stock-meta {
+      font-size: 9px;
+      color: var(--text-muted);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 16px;
+    }
+
+    .stock-meta-item strong {
+      color: var(--text-secondary);
+      display: block;
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      font-weight: 400;
+      text-transform: uppercase;
+      margin-bottom: 1px;
+    }
+
+    /* ============================================================
+       PANEL 4 — CHAOS FEED
+    ============================================================ */
+    .feed-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .feed-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-dim);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    .feed-item:last-child {
+      border-bottom: none;
+    }
+
+    .feed-headline {
+      font-size: 11px;
+      color: var(--text-primary);
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+      font-family: var(--font);
+    }
+
+    .feed-headline:hover {
+      color: var(--accent-bright);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-dim);
+    }
+
+    .feed-meta {
+      font-size: 8.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    .feed-source {
+      color: var(--text-secondary);
+      display: block;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 8px;
+    }
+
+    .feed-error {
+      font-size: 10px;
+      color: var(--text-muted);
+      padding: 8px 0;
+      line-height: 1.8;
+    }
+
+    .feed-error code {
+      display: block;
+      font-size: 8.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      padding: 6px 8px;
+      background: var(--surface-alt);
+      border-left: 2px solid var(--border);
+    }
+
+    /* ============================================================
+       PANEL 5 — BRAND HEALTH
+    ============================================================ */
+    .brand-score {
+      font-size: 42px;
+      font-weight: 300;
+      line-height: 1;
+      margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .brand-score.positive { color: var(--accent); }
+    .brand-score.negative { color: var(--red); }
+    .brand-score.neutral  { color: var(--text-secondary); }
+
+    .brand-verdict {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      font-weight: 600;
+    }
+
+    .brand-verdict.positive { color: var(--accent); }
+    .brand-verdict.negative { color: var(--red); }
+    .brand-verdict.neutral  { color: var(--text-secondary); }
+
+    .brand-meter-track {
+      height: 3px;
+      background: var(--border);
+      position: relative;
+      margin-bottom: 6px;
+    }
+
+    .brand-meter-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .brand-meter-fill.negative {
+      background: var(--red);
+    }
+
+    .brand-meter-marker {
+      position: absolute;
+      top: -4px;
+      width: 2px;
+      height: 11px;
+      background: var(--text-primary);
+      transform: translateX(-50%);
+      transition: left 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .brand-meter-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .brand-breakdown {
+      font-size: 9px;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+
+    .brand-breakdown strong {
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* ============================================================
+       PANEL 6 — MICROSOFT TIME
+    ============================================================ */
+    .mstime-fy {
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mstime-fy span {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .mstime-quarter {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .mstime-detail {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+
+    .mstime-detail strong {
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .mstime-progress-track {
+      height: 2px;
+      background: var(--border);
+      margin: 12px 0 4px;
+      position: relative;
+    }
+
+    .mstime-progress-fill {
+      height: 100%;
+      background: var(--accent-bright);
+      transition: width 1s ease;
+    }
+
+    .mstime-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .footer {
+      padding: 8px 2px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-dim);
+      margin-top: 1px;
+    }
+
+    .footer-stamp {
+      font-size: 8.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .footer-stamp span {
+      color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       UTILITY
+    ============================================================ */
+    .unavailable {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .dash {
+      color: var(--text-muted);
+    }
+
+    /* Panels use position:relative for potential absolute children */
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-title"><span>MSFT</span> DASHBOARD</div>
+    <div class="header-meta" id="last-updated">INITIALIZING...</div>
+  </div>
+
+  <!-- DASHBOARD GRID -->
+  <div class="dashboard">
+
+    <!-- ====================================================
+         PANEL 1: CLOCKS
+    ==================================================== -->
+    <div class="panel panel-clocks" style="padding:0;">
+      <div style="padding:14px 16px 10px;">
+        <div class="panel-label">WORLD CLOCKS</div>
+      </div>
+      <div class="clocks-grid">
+        <div class="clock-cell">
+          <div class="clock-city">REDMOND &middot; PT</div>
+          <div class="clock-time" id="clock-pt">--:--:--</div>
+          <div class="clock-date" id="clock-pt-date">---</div>
+        </div>
+        <div class="clock-cell">
+          <div class="clock-city">NEW YORK &middot; ET</div>
+          <div class="clock-time" id="clock-et">--:--:--</div>
+          <div class="clock-date" id="clock-et-date">---</div>
+        </div>
+        <div class="clock-cell">
+          <div class="clock-city">OSLO &middot; CET</div>
+          <div class="clock-time" id="clock-cet">--:--:--</div>
+          <div class="clock-date" id="clock-cet-date">---</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         PANEL 2: WEATHER
+    ==================================================== -->
+    <div class="panel panel-weather">
+      <div class="panel-label">REDMOND WX</div>
+      <div id="weather-content">
+        <div class="weather-main">
+          <pre class="weather-glyph dash">    ?
+  (   )
+   ___
+        </pre>
+          <div class="weather-data">
+            <div class="weather-temp"><span class="dash">---</span> <span>&deg;F</span></div>
+            <div class="weather-desc dash">LOADING...</div>
+            <div class="weather-detail dash">---</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         PANEL 3: MSFT STOCK
+    ==================================================== -->
+    <div class="panel panel-stock">
+      <div class="panel-label">MSFT &middot; NASDAQ</div>
+      <div id="stock-content">
+        <div class="stock-price dash">---.--</div>
+        <div class="stock-delta flat dash">-- (--.--%)</div>
+        <div class="stock-sparkline dash">▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁</div>
+        <div class="stock-meta">
+          <div class="stock-meta-item">
+            <strong>Open</strong>
+            <span class="dash" id="stock-open">---</span>
+          </div>
+          <div class="stock-meta-item">
+            <strong>Prev Close</strong>
+            <span class="dash" id="stock-prev">---</span>
+          </div>
+          <div class="stock-meta-item">
+            <strong>High</strong>
+            <span class="dash" id="stock-high">---</span>
+          </div>
+          <div class="stock-meta-item">
+            <strong>Low</strong>
+            <span class="dash" id="stock-low">---</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         PANEL 6: MICROSOFT TIME (row 2, col 3)
+    ==================================================== -->
+    <div class="panel panel-mstime">
+      <div class="panel-label">MICROSOFT TIME</div>
+      <div id="mstime-content">
+        <div class="mstime-fy"><span>FY</span><span id="ms-fy-year">--</span></div>
+        <div class="mstime-quarter" id="ms-quarter">Q-</div>
+        <div class="mstime-progress-track">
+          <div class="mstime-progress-fill" id="ms-q-progress" style="width:0%"></div>
+        </div>
+        <div class="mstime-progress-label">
+          <span>QTR START</span>
+          <span id="ms-q-pct">--%</span>
+          <span>QTR END</span>
+        </div>
+        <div class="mstime-detail" style="margin-top:12px">
+          <div><strong>DAYS REM</strong> <span id="ms-days-rem">---</span></div>
+          <div><strong>QTR END &nbsp;</strong> <span id="ms-qtr-end">---</span></div>
+          <div><strong>FY END &nbsp;&nbsp;</strong> <span id="ms-fy-end">---</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         PANEL 4: CHAOS FEED
+    ==================================================== -->
+    <div class="panel panel-feed">
+      <div class="panel-label">CHAOS FEED
+        <span style="font-size:8px;letter-spacing:0.05em;color:var(--text-muted);font-weight:400;text-transform:none;" id="feed-refresh-info">AUTO-REFRESH 5MIN</span>
+      </div>
+      <ul class="feed-list" id="feed-list">
+        <li class="feed-item">
+          <span class="feed-headline dash">Loading headlines...</span>
+          <span class="feed-meta"></span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ====================================================
+         PANEL 5: BRAND HEALTH
+    ==================================================== -->
+    <div class="panel panel-brand">
+      <div class="panel-label">MSFT BRAND PULSE</div>
+      <div class="brand-score neutral dash" id="brand-score">--</div>
+      <div class="brand-verdict neutral dash" id="brand-verdict">CALCULATING</div>
+      <div class="brand-meter-track">
+        <div class="brand-meter-fill" id="brand-fill" style="width:50%"></div>
+        <div class="brand-meter-marker" id="brand-marker" style="left:50%"></div>
+      </div>
+      <div class="brand-meter-labels">
+        <span>CRITICAL</span>
+        <span>NEUTRAL</span>
+        <span>STRONG</span>
+      </div>
+      <div class="brand-breakdown">
+        <div><strong>HEADLINES &nbsp;</strong> <span id="brand-count">--</span></div>
+        <div><strong>AVG SCORE &nbsp;</strong> <span id="brand-avg">--</span></div>
+        <div><strong>POSITIVE &nbsp;&nbsp;</strong> <span id="brand-pos">--</span></div>
+        <div><strong>NEGATIVE &nbsp;&nbsp;</strong> <span id="brand-neg">--</span></div>
+      </div>
+    </div>
+
+  </div><!-- end .dashboard -->
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-stamp">MICROSOFT BRAND MONITOR &middot; PERSONAL</div>
+    <div class="footer-stamp">UPDATED <span id="footer-time">--:--:--</span></div>
+  </div>
+
+  <script>
+  /* ============================================================
+     CONFIG
+     API keys are now server-side (Vercel env vars).
+     Only the weather endpoint is called directly (no key needed).
+  ============================================================ */
+  const WEATHER_CITY       = 'Redmond,WA';
+
+  /* ============================================================
+     LUXON ALIAS
+  ============================================================ */
+  const { DateTime, Duration } = luxon;
+
+  /* ============================================================
+     PANEL 1: CLOCKS
+  ============================================================ */
+  const CLOCKS = [
+    { id: 'pt',  zone: 'America/Los_Angeles' },
+    { id: 'et',  zone: 'America/New_York'    },
+    { id: 'cet', zone: 'Europe/Oslo'         },
+  ];
+
+  function tickClocks() {
+    const now = DateTime.now();
+    CLOCKS.forEach(({ id, zone }) => {
+      const t = now.setZone(zone);
+      const el = document.getElementById(`clock-${id}`);
+      const de = document.getElementById(`clock-${id}-date`);
+      if (el) el.textContent = t.toFormat('HH:mm:ss');
+      if (de) de.textContent = t.toFormat('EEE, dd MMM yyyy').toUpperCase();
+    });
+  }
+
+  setInterval(tickClocks, 1000);
+  tickClocks();
+
+  /* ============================================================
+     PANEL 6: MICROSOFT FISCAL TIME
+     FY starts July 1. Quarters:
+       Q1: Jul 1 – Sep 30
+       Q2: Oct 1 – Dec 31
+       Q3: Jan 1 – Mar 31
+       Q4: Apr 1 – Jun 30
+  ============================================================ */
+  function getMicrosoftTime() {
+    const now   = DateTime.now().setZone('America/Los_Angeles');
+    const month = now.month; // 1–12
+    const year  = now.year;
+
+    let fyYear, quarter, qStart, qEnd;
+
+    // Microsoft FY starts July 1; the FY number matches the calendar year it ends in.
+    // e.g. Jul–Jun 2025/2026 = FY2026
+    if (month >= 7) {
+      fyYear = year + 1;
+      if (month <= 9) {
+        quarter = 1;
+        qStart  = DateTime.fromObject({ year, month: 7,  day: 1  });
+        qEnd    = DateTime.fromObject({ year, month: 9,  day: 30 });
+      } else {
+        quarter = 2;
+        qStart  = DateTime.fromObject({ year, month: 10, day: 1  });
+        qEnd    = DateTime.fromObject({ year, month: 12, day: 31 });
+      }
+    } else {
+      fyYear = year;
+      if (month <= 3) {
+        quarter = 3;
+        qStart  = DateTime.fromObject({ year, month: 1, day: 1  });
+        qEnd    = DateTime.fromObject({ year, month: 3, day: 31 });
+      } else {
+        quarter = 4;
+        qStart  = DateTime.fromObject({ year, month: 4, day: 1  });
+        qEnd    = DateTime.fromObject({ year, month: 6, day: 30 });
+      }
+    }
+
+    const fyEnd       = DateTime.fromObject({ year: fyYear, month: 6, day: 30 });
+    const daysInQtr   = Math.round(qEnd.diff(qStart, 'days').days) + 1;
+    const daysElapsed = Math.max(0, Math.round(now.diff(qStart, 'days').days));
+    const daysRem     = Math.max(0, Math.round(qEnd.diff(now.startOf('day'), 'days').days));
+    const pct         = Math.min(100, Math.round((daysElapsed / daysInQtr) * 100));
+
+    document.getElementById('ms-fy-year').textContent = fyYear;
+    document.getElementById('ms-quarter').textContent = `Q${quarter}`;
+    document.getElementById('ms-q-progress').style.width = pct + '%';
+    document.getElementById('ms-q-pct').textContent = pct + '%';
+    document.getElementById('ms-days-rem').textContent = daysRem + ' DAYS';
+    document.getElementById('ms-qtr-end').textContent  = qEnd.toFormat('dd MMM yyyy').toUpperCase();
+    document.getElementById('ms-fy-end').textContent   = fyEnd.toFormat('dd MMM yyyy').toUpperCase();
+  }
+
+  getMicrosoftTime();
+
+  /* ============================================================
+     PANEL 2: WEATHER — wttr.in
+  ============================================================ */
+  const WEATHER_ICONS = {
+    sunny: [
+      '   \\   /   ',
+      '    .-.    ',
+      '‒ (   ) ‒  ',
+      "    `-'    ",
+      '   /   \\   ',
+    ],
+    pcloudy: [
+      '   \\  /    ',
+      ' _ /"".-. ',
+      '   \\_( ).  ',
+      '   /(___(__)',
+      '           ',
+    ],
+    cloudy: [
+      '           ',
+      '   .--.    ',
+      '.-(    ).  ',
+      '(___.__)_) ',
+      '           ',
+    ],
+    rain: [
+      '   .--.    ',
+      '.-(    ).  ',
+      '(___.__)_) ',
+      " ‚ʻ‚ʻ‚ʻ‚ʻ  ",
+      " ‚ʻ‚ʻ‚ʻ‚ʻ  ",
+    ],
+    snow: [
+      '   .--.    ',
+      '.-(    ).  ',
+      '(___.__)_) ',
+      '  * * * *  ',
+      ' * * * *   ',
+    ],
+    thunder: [
+      '   .--.    ',
+      '.-(    ).  ',
+      '(___.__)_) ',
+      '  ‚ʻ⚡ʻ‚ʻ   ',
+      '  ‚ʻ‚ʻ⚡ʻ   ',
+    ],
+    fog: [
+      '           ',
+      '_ - _ - _  ',
+      ' _ - _ - _ ',
+      '_ - _ - _  ',
+      '           ',
+    ],
+    sleet: [
+      '   .--.    ',
+      '.-(    ).  ',
+      '(___.__)_) ',
+      " ‚ʻ*‚ʻ*‚ʻ  ",
+      " *‚ʻ*‚ʻ*   ",
+    ],
+  };
+
+  function getWeatherIconKey(code) {
+    const c = parseInt(code, 10);
+    if (c === 113) return 'sunny';
+    if (c === 116) return 'pcloudy';
+    if ([119, 122].includes(c)) return 'cloudy';
+    if ([143, 248, 260].includes(c)) return 'fog';
+    if ([176, 293, 296, 299, 302, 305, 308, 353, 356, 359].includes(c)) return 'rain';
+    if ([179, 182, 185, 281, 284, 311, 314, 317, 320, 362, 365, 374, 377].includes(c)) return 'sleet';
+    if ([200, 386, 389, 392, 395].includes(c)) return 'thunder';
+    if ([227, 230, 323, 326, 329, 332, 335, 338, 350, 368, 371].includes(c)) return 'snow';
+    return 'cloudy';
+  }
+
+  async function fetchWeather() {
+    try {
+      const res  = await fetch(`https://wttr.in/${WEATHER_CITY}?format=j1`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      const current   = data.current_condition[0];
+      const tempF     = current.temp_F;
+      const feelsF    = current.FeelsLikeF;
+      const desc      = current.weatherDesc[0].value;
+      const windMph   = current.windspeedMiles;
+      const windDir   = current.winddir16Point;
+      const humidity  = current.humidity;
+      const visibMi   = current.visibility;
+      const code      = current.weatherCode;
+
+      const iconKey   = getWeatherIconKey(code);
+      const iconLines = (WEATHER_ICONS[iconKey] || WEATHER_ICONS['cloudy']).join('\n');
+
+      document.getElementById('weather-content').innerHTML = `
+        <div class="weather-main">
+          <pre class="weather-glyph">${iconLines}</pre>
+          <div class="weather-data">
+            <div class="weather-temp">${tempF}<span>&deg;F</span></div>
+            <div class="weather-desc">${desc.toUpperCase()}</div>
+            <div class="weather-detail">
+              <div><strong>FEELS</strong> ${feelsF}&deg;F</div>
+              <div><strong>WIND &nbsp;</strong> ${windMph} MPH ${windDir}</div>
+              <div><strong>HUMID</strong> ${humidity}%</div>
+              <div><strong>VIS &nbsp;&nbsp;</strong> ${visibMi} MI</div>
+            </div>
+          </div>
+        </div>
+      `;
+    } catch (e) {
+      document.getElementById('weather-content').innerHTML =
+        '<div class="unavailable">UNAVAILABLE</div>';
+    }
+  }
+
+  fetchWeather();
+  setInterval(fetchWeather, 30 * 60 * 1000); // refresh every 30 min
+
+  /* ============================================================
+     PANEL 3: MSFT STOCK — Alpha Vantage
+  ============================================================ */
+  const SPARKLINE_CHARS = ['▁','▂','▃','▄','▅','▆','▇','█'];
+
+  function makeSparkline(values) {
+    if (!values || values.length === 0) return '';
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    return values.map(v => {
+      const idx = Math.round(((v - min) / range) * (SPARKLINE_CHARS.length - 1));
+      return SPARKLINE_CHARS[idx];
+    }).join('');
+  }
+
+  async function fetchStock() {
+    try {
+      // Fetch from serverless proxy (API key stays server-side)
+      const quoteRes = await fetch('/api/stock');
+      if (!quoteRes.ok) {
+        if (quoteRes.status === 429) {
+          const errData = await quoteRes.json();
+          document.getElementById('stock-content').innerHTML =
+            `<div class="unavailable">RATE LIMITED</div>
+             <div class="feed-error" style="margin-top:8px">${(errData.error || '').substring(0, 120)}</div>`;
+          return;
+        }
+        throw new Error(`HTTP ${quoteRes.status}`);
+      }
+      const stockData = await quoteRes.json();
+      if (stockData.error) throw new Error(stockData.error);
+
+      const q       = stockData.quote;
+      if (!q || !q['05. price']) throw new Error('No quote data');
+
+      const price   = parseFloat(q['05. price']);
+      const change  = parseFloat(q['09. change']);
+      const changePct = parseFloat(q['10. change percent']);
+      const open    = parseFloat(q['02. open']);
+      const high    = parseFloat(q['03. high']);
+      const low     = parseFloat(q['04. low']);
+      const prev    = parseFloat(q['08. previous close']);
+
+      const deltaClass = change > 0 ? 'positive' : change < 0 ? 'negative' : 'flat';
+      const deltaSign  = change > 0 ? '+' : '';
+
+      // Sparkline from server response
+      let sparkHtml = '';
+      if (stockData.intraday && stockData.intraday.length > 0) {
+        sparkHtml = `<div class="stock-sparkline ${deltaClass}">${makeSparkline(stockData.intraday)}</div>`;
+      }
+
+      document.getElementById('stock-content').innerHTML = `
+        <div class="stock-price">$${price.toFixed(2)}</div>
+        <div class="stock-delta ${deltaClass}">${deltaSign}$${change.toFixed(2)} (${deltaSign}${Math.abs(changePct).toFixed(2)}%)</div>
+        ${sparkHtml}
+        <div class="stock-meta">
+          <div class="stock-meta-item"><strong>Open</strong>$${open.toFixed(2)}</div>
+          <div class="stock-meta-item"><strong>Prev Close</strong>$${prev.toFixed(2)}</div>
+          <div class="stock-meta-item"><strong>High</strong>$${high.toFixed(2)}</div>
+          <div class="stock-meta-item"><strong>Low</strong>$${low.toFixed(2)}</div>
+        </div>
+      `;
+    } catch (e) {
+      document.getElementById('stock-content').innerHTML =
+        `<div class="unavailable">UNAVAILABLE</div>
+         <div class="feed-error" style="margin-top:8px">${e.message}</div>`;
+    }
+  }
+
+  fetchStock();
+  setInterval(fetchStock, 15 * 60 * 1000); // 15-min refresh (rate limit conscious)
+
+  /* ============================================================
+     PANEL 5: SENTIMENT ENGINE (AFINN-based)
+  ============================================================ */
+  const AFINN = {
+    'abandon':-2,'abuse':-3,'abusive':-3,'amazing':4,'awesome':4,
+    'bad':-3,'barrier':-1,'beautiful':3,'best':3,'better':2,
+    'bias':-1,'blame':-2,'boost':2,'breach':-3,'breakthrough':3,
+    'broken':-2,'cancel':-2,'canceled':-2,'cancellation':-2,
+    'catastrophe':-4,'challenge':-1,'collapse':-3,'concern':-2,
+    'confident':2,'controversy':-2,'crisis':-3,'damage':-2,
+    'dangerous':-2,'deal':1,'decline':-2,'delay':-1,'demand':1,
+    'disappoint':-2,'dominant':2,'dominance':2,'drop':-2,
+    'earn':2,'excellent':4,'expand':2,'fail':-2,'failure':-3,
+    'fall':-2,'fantastic':4,'fine':-1,'fire':-1,'fired':-2,
+    'flaw':-2,'fraud':-4,'gain':2,'good':3,'great':3,
+    'grow':2,'growth':2,'hack':-2,'hacked':-3,'help':2,'high':2,
+    'hit':1,'hurt':-2,'improve':2,'improved':2,'improvement':2,
+    'incredible':4,'innovate':2,'innovation':2,'invest':1,
+    'issue':-1,'job':1,'launch':2,'layoff':-3,'layoffs':-3,
+    'lead':2,'leading':2,'leak':-2,'lawsuit':-2,'loss':-2,
+    'low':-1,'malware':-3,'milestone':2,'new':1,'outage':-3,
+    'overhaul':1,'partner':2,'partnership':2,'penalty':-2,
+    'performance':1,'positive':2,'powerful':2,'problem':-2,
+    'profit':2,'promote':2,'record':1,'revenue':1,'rise':2,
+    'risk':-1,'secure':2,'security':1,'sell':-1,'settle':-1,
+    'share':1,'soar':3,'strong':2,'struggle':-2,'success':3,
+    'sue':-2,'suffer':-2,'top':2,'trouble':-2,'trust':2,
+    'uncertain':-1,'update':1,'upgrade':2,'victory':3,
+    'violat':-3,'vulnerability':-2,'warn':-1,'win':3,'winner':3,
+    'worst':-3,'zero':-1,
+  };
+
+  function scoreSentiment(text) {
+    const words = text.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+    let score = 0;
+    let hits = 0;
+    words.forEach(w => {
+      // check exact and stem matches
+      if (AFINN[w] !== undefined) {
+        score += AFINN[w];
+        hits++;
+      } else {
+        // check 5-char stem
+        const stem = w.substring(0, 5);
+        const stemKey = Object.keys(AFINN).find(k => k.startsWith(stem) && k.length >= 5);
+        if (stemKey) {
+          score += AFINN[stemKey];
+          hits++;
+        }
+      }
+    });
+    return score;
+  }
+
+  function updateBrandHealth(headlines) {
+    if (!headlines || headlines.length === 0) return;
+
+    const scores  = headlines.map(h => scoreSentiment(h.title + ' ' + (h.description || '')));
+    const total   = scores.reduce((a, b) => a + b, 0);
+    const avg     = total / scores.length;
+    const posCount = scores.filter(s => s > 0).length;
+    const negCount = scores.filter(s => s < 0).length;
+
+    // Normalize avg to 0–100 scale. Typical range is -10 to +10
+    const normalized = Math.min(100, Math.max(0, ((avg + 10) / 20) * 100));
+    const pct        = normalized.toFixed(0);
+
+    let verdict, cls;
+    if (avg >= 4)       { verdict = 'STRONG';   cls = 'positive'; }
+    else if (avg >= 1)  { verdict = 'POSITIVE';  cls = 'positive'; }
+    else if (avg >= -1) { verdict = 'NEUTRAL';   cls = 'neutral';  }
+    else if (avg >= -4) { verdict = 'CAUTIOUS';  cls = 'negative'; }
+    else                { verdict = 'CRITICAL';  cls = 'negative'; }
+
+    const scoreEl   = document.getElementById('brand-score');
+    const verdictEl = document.getElementById('brand-verdict');
+    const fillEl    = document.getElementById('brand-fill');
+    const markerEl  = document.getElementById('brand-marker');
+
+    scoreEl.textContent   = (avg >= 0 ? '+' : '') + avg.toFixed(1);
+    scoreEl.className     = `brand-score ${cls}`;
+    verdictEl.textContent = verdict;
+    verdictEl.className   = `brand-verdict ${cls}`;
+    fillEl.style.width    = pct + '%';
+    fillEl.className      = `brand-meter-fill ${cls === 'negative' ? 'negative' : ''}`;
+    markerEl.style.left   = pct + '%';
+
+    document.getElementById('brand-count').textContent = headlines.length;
+    document.getElementById('brand-avg').textContent   = (avg >= 0 ? '+' : '') + avg.toFixed(2);
+    document.getElementById('brand-pos').textContent   = posCount;
+    document.getElementById('brand-neg').textContent   = negCount;
+  }
+
+  /* ============================================================
+     PANEL 4: CHAOS FEED — NewsAPI
+     NOTE: NewsAPI free plan restricts browser (CORS) requests
+     to localhost. If opening from file://, run a local server:
+       python -m http.server 8080
+       npx serve .
+  ============================================================ */
+  function timeAgo(dateStr) {
+    const then = DateTime.fromISO(dateStr);
+    const now  = DateTime.now();
+    const diff = now.diff(then, ['hours', 'minutes']).toObject();
+    const h    = Math.floor(diff.hours || 0);
+    const m    = Math.floor(diff.minutes || 0);
+    if (h >= 24) return `${Math.floor(h / 24)}d AGO`;
+    if (h >= 1)  return `${h}H AGO`;
+    if (m >= 1)  return `${m}M AGO`;
+    return 'JUST NOW';
+  }
+
+  // Keywords that must appear in the headline title for an article to count
+  // toward Brand Pulse. Broader terms (Xbox, Teams) stay in the feed but
+  // don't drive the sentiment score unless they're paired with Microsoft.
+  const BRAND_PULSE_TERMS = /microsoft|msft|azure|copilot|satya|nadella|suleyman|openai.*microsoft|microsoft.*openai/i;
+
+  async function fetchNews() {
+    const feedEl = document.getElementById('feed-list');
+
+    try {
+      // Fetch from serverless proxy (API key stays server-side)
+      const res = await fetch('/api/news');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const unique = data.articles || [];
+
+      if (unique.length === 0) throw new Error('No articles returned');
+
+      // Only articles whose title matches a core Microsoft term feed Brand Pulse
+      const brandArticles = unique.filter(a => BRAND_PULSE_TERMS.test(a.title));
+
+      feedEl.innerHTML = unique.map(a => {
+        const scoresBrand = BRAND_PULSE_TERMS.test(a.title);
+        return `
+        <li class="feed-item">
+          <a class="feed-headline" href="${escapeHtml(a.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.title)}</a>
+          <span class="feed-meta">
+            <span class="feed-source">${escapeHtml((a.source?.name || '').toUpperCase())}</span>
+            ${timeAgo(a.publishedAt)}${scoresBrand ? '<span style="color:var(--accent);margin-left:4px" title="Counts toward Brand Pulse">●</span>' : ''}
+          </span>
+        </li>`;
+      }).join('');
+
+      updateBrandHealth(brandArticles);
+      updateFooterTime();
+
+    } catch (e) {
+      feedEl.innerHTML = `
+        <li class="feed-item" style="display:block">
+          <div class="feed-error">
+            UNAVAILABLE — ${e.message.toUpperCase()}
+          </div>
+        </li>
+      `;
+      // Still update brand with empty
+      updateBrandHealth([]);
+    }
+  }
+
+  fetchNews();
+  setInterval(fetchNews, 5 * 60 * 1000); // 5-min refresh
+
+  /* ============================================================
+     FOOTER TIMESTAMP
+  ============================================================ */
+  function updateFooterTime() {
+    const now = DateTime.now().setZone('America/Los_Angeles');
+    const ts  = now.toFormat('HH:mm:ss');
+    const el  = document.getElementById('footer-time');
+    const hdr = document.getElementById('last-updated');
+    if (el) el.textContent = ts;
+    if (hdr) hdr.textContent = `PT ${ts}`;
+  }
+
+  setInterval(updateFooterTime, 1000);
+  updateFooterTime();
+
+  /* ============================================================
+     UTILITY
+  ============================================================ */
+  function escapeHtml(str) {
+    return (str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  </script>
+</body>
+</html>
