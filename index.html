@@ -520,40 +520,15 @@
     /* Panels use position:relative for potential absolute children */
 
     /* ============================================================
-       CURSOR GLOW — cloudy color wash that follows the mouse
+       CURSOR GLOW — text-only color shift near cursor
+       Uses CSS transition for smooth cloudy falloff
     ============================================================ */
-    .cursor-glow {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 500px;
-      height: 500px;
-      pointer-events: none;
-      z-index: 9999;
-      border-radius: 50%;
-      background: radial-gradient(
-        circle at center,
-        rgba(100, 180, 255, 0.28) 0%,
-        rgba(0, 120, 212, 0.10) 30%,
-        transparent 60%
-      );
-      mix-blend-mode: color-dodge;
-      transform: translate(-50%, -50%);
-      will-change: transform, opacity;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-      filter: blur(12px);
-    }
-
-    .cursor-glow.active {
-      opacity: 1;
+    .glow-text {
+      transition: color 0.5s ease;
     }
   </style>
 </head>
 <body>
-
-  <!-- CURSOR GLOW OVERLAY -->
-  <div class="cursor-glow" id="cursor-glow"></div>
 
   <!-- HEADER -->
   <div class="header">
@@ -1188,32 +1163,92 @@
   }
 
   /* ============================================================
-     CURSOR GLOW — smooth cloudy color follow
-     Uses requestAnimationFrame with lerp for fluid motion
+     CURSOR GLOW — text-only color shift based on proximity
+     Collects all visible text containers once, then on each
+     animation frame lerps toward cursor and recolors nearby text.
+     Only text color changes — background is never touched.
   ============================================================ */
   (() => {
-    const glow = document.getElementById('cursor-glow');
-    let mouseX = 0, mouseY = 0;
-    let glowX = 0, glowY = 0;
-    const EASE = 0.08; // lower = more drag, cloudier feel
+    const RADIUS   = 280;  // px — how far the glow reaches
+    const EASE     = 0.07; // lerp factor — lower = cloudier drift
+    const GLOW_RGB = [100, 180, 255]; // bright blue-white
+
+    let mouseX = -9999, mouseY = -9999;
+    let glowX  = -9999, glowY  = -9999;
+    let active = false;
+
+    // Collect all leaf-level text containers
+    const TEXT_SELECTORS = [
+      '.clock-time', '.clock-date', '.clock-city',
+      '.weather-temp', '.weather-desc', '.weather-detail div',
+      '.weather-glyph',
+      '.stock-price', '.stock-delta', '.stock-sparkline',
+      '.stock-meta-item', '.stock-meta-item strong',
+      '.mstime-fy', '.mstime-quarter', '.mstime-detail div',
+      '.mstime-progress-label span',
+      '.feed-headline', '.feed-meta', '.feed-source',
+      '.brand-score', '.brand-verdict', '.brand-breakdown div',
+      '.brand-meter-labels span',
+      '.panel-label',
+      '.header-title', '.header-meta',
+      '.footer-stamp',
+    ];
+
+    const elements = [];
+    TEXT_SELECTORS.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        el.classList.add('glow-text');
+        // Cache the original computed color
+        const orig = getComputedStyle(el).color;
+        el._glowOrigColor = orig;
+        elements.push(el);
+      });
+    });
 
     document.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
-      if (!glow.classList.contains('active')) {
-        glow.classList.add('active');
-      }
+      active = true;
     });
 
     document.addEventListener('mouseleave', () => {
-      glow.classList.remove('active');
+      active = false;
     });
 
+    function parseRGB(str) {
+      const m = str.match(/\d+/g);
+      return m ? m.slice(0, 3).map(Number) : [0, 0, 0];
+    }
+
+    function lerpColor(orig, target, t) {
+      return orig.map((c, i) => Math.round(c + (target[i] - c) * t));
+    }
+
     function animate() {
-      // Lerp toward cursor — gives the cloudy, drifting feel
+      // Smooth follow — gives the cloudy, drifting lag
       glowX += (mouseX - glowX) * EASE;
       glowY += (mouseY - glowY) * EASE;
-      glow.style.transform = `translate(${glowX - 250}px, ${glowY - 250}px)`;
+
+      for (let i = 0; i < elements.length; i++) {
+        const el   = elements[i];
+        const rect = el.getBoundingClientRect();
+        const cx   = rect.left + rect.width / 2;
+        const cy   = rect.top + rect.height / 2;
+        const dx   = glowX - cx;
+        const dy   = glowY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (active && dist < RADIUS) {
+          // Quadratic falloff for a soft, organic feel
+          const t = Math.pow(1 - dist / RADIUS, 2) * 0.85;
+          const origRGB = parseRGB(el._glowOrigColor);
+          const mixed   = lerpColor(origRGB, GLOW_RGB, t);
+          el.style.color = `rgb(${mixed[0]},${mixed[1]},${mixed[2]})`;
+        } else {
+          el.style.color = '';
+        }
+      }
+
       requestAnimationFrame(animate);
     }
     animate();
