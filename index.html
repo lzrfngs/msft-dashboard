@@ -1169,9 +1169,9 @@
      Only text color changes — background is never touched.
   ============================================================ */
   (() => {
-    const RADIUS   = 280;  // px — how far the glow reaches
-    const EASE     = 0.07; // lerp factor — lower = cloudier drift
-    const GLOW_RGB = [100, 180, 255]; // bright blue-white
+    const RADIUS   = 400;  // px — how far the glow reaches
+    const EASE     = 0.06; // lerp factor — lower = cloudier drift
+    const GLOW_RGB = [160, 210, 255]; // brighter blue-white
 
     let mouseX = -9999, mouseY = -9999;
     let glowX  = -9999, glowY  = -9999;
@@ -1240,7 +1240,7 @@
 
         if (active && dist < RADIUS) {
           // Quadratic falloff for a soft, organic feel
-          const t = Math.pow(1 - dist / RADIUS, 2) * 0.85;
+          const t = Math.pow(1 - dist / RADIUS, 2) * 1.0;
           const origRGB = parseRGB(el._glowOrigColor);
           const mixed   = lerpColor(origRGB, GLOW_RGB, t);
           el.style.color = `rgb(${mixed[0]},${mixed[1]},${mixed[2]})`;
