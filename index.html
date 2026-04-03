@@ -518,9 +518,43 @@
     }
 
     /* Panels use position:relative for potential absolute children */
+
+    /* ============================================================
+       CURSOR GLOW — cloudy color wash that follows the mouse
+    ============================================================ */
+    .cursor-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 500px;
+      height: 500px;
+      pointer-events: none;
+      z-index: 9999;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at center,
+        rgba(0, 120, 212, 0.18) 0%,
+        rgba(0, 120, 212, 0.08) 25%,
+        rgba(0, 120, 212, 0.03) 50%,
+        transparent 70%
+      );
+      mix-blend-mode: screen;
+      transform: translate(-50%, -50%);
+      will-change: transform, opacity;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      filter: blur(20px);
+    }
+
+    .cursor-glow.active {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
+
+  <!-- CURSOR GLOW OVERLAY -->
+  <div class="cursor-glow" id="cursor-glow"></div>
 
   <!-- HEADER -->
   <div class="header">
@@ -1153,6 +1187,38 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
+
+  /* ============================================================
+     CURSOR GLOW — smooth cloudy color follow
+     Uses requestAnimationFrame with lerp for fluid motion
+  ============================================================ */
+  (() => {
+    const glow = document.getElementById('cursor-glow');
+    let mouseX = 0, mouseY = 0;
+    let glowX = 0, glowY = 0;
+    const EASE = 0.08; // lower = more drag, cloudier feel
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (!glow.classList.contains('active')) {
+        glow.classList.add('active');
+      }
+    });
+
+    document.addEventListener('mouseleave', () => {
+      glow.classList.remove('active');
+    });
+
+    function animate() {
+      // Lerp toward cursor — gives the cloudy, drifting feel
+      glowX += (mouseX - glowX) * EASE;
+      glowY += (mouseY - glowY) * EASE;
+      glow.style.transform = `translate(${glowX - 250}px, ${glowY - 250}px)`;
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
 
   </script>
 </body>
