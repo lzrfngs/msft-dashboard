@@ -533,17 +533,16 @@
       border-radius: 50%;
       background: radial-gradient(
         circle at center,
-        rgba(0, 120, 212, 0.18) 0%,
-        rgba(0, 120, 212, 0.08) 25%,
-        rgba(0, 120, 212, 0.03) 50%,
-        transparent 70%
+        rgba(100, 180, 255, 0.28) 0%,
+        rgba(0, 120, 212, 0.10) 30%,
+        transparent 60%
       );
-      mix-blend-mode: screen;
+      mix-blend-mode: color-dodge;
       transform: translate(-50%, -50%);
       will-change: transform, opacity;
       opacity: 0;
       transition: opacity 0.6s ease;
-      filter: blur(20px);
+      filter: blur(12px);
     }
 
     .cursor-glow.active {
