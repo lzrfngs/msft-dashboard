@@ -5,27 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MSFT DASHBOARD</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <style>
     /* ============================================================
-       DESIGN TOKENS
+       DESIGN TOKENS — Kraken Design System
     ============================================================ */
     :root {
-      --bg:            #080809;
-      --surface:       #0e0e10;
-      --surface-alt:   #121214;
-      --border:        #1c1c21;
-      --border-dim:    #161619;
-      --text-primary:  #e2e2e6;
-      --text-secondary:#8888a0;
-      --text-muted:    #58586e;
-      --accent:        #0078D4;
-      --accent-bright: #1a8fe0;
-      --accent-dim:    rgba(0,120,212,0.12);
-      --red:           #c8343a;
-      --red-dim:       rgba(200,52,58,0.12);
-      --font: 'Berkeley Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+      --bg:            #0d0d11;
+      --surface:       #16161d;
+      --surface-alt:   #1c1c25;
+      --border:        #2a2a36;
+      --border-dim:    #222230;
+      --text-primary:  #e8e8ec;
+      --text-secondary:#9497a9;
+      --text-muted:    #686b82;
+      --accent:        #7b5af5;
+      --accent-bright: #9b7dff;
+      --accent-dim:    rgba(133,91,251,0.20);
+      --green:         #2dd17e;
+      --green-dim:     rgba(45,209,126,0.16);
+      --red:           #f04452;
+      --red-dim:       rgba(240,68,82,0.14);
+      --shadow:        rgba(0,0,0,0.25) 0px 4px 24px;
+      --shadow-micro:  rgba(0,0,0,0.15) 0px 1px 4px;
+      --radius:        12px;
+      --radius-sm:     8px;
+      --font: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
     /* ============================================================
@@ -45,10 +52,10 @@
       background: var(--bg);
       color: var(--text-primary);
       font-family: var(--font);
-      font-size: 12px;
+      font-size: 14px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
-      padding: 12px;
+      padding: 16px;
       min-height: 100vh;
     }
 
@@ -59,16 +66,16 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 2px 10px;
-      margin-bottom: 1px;
+      padding: 0 4px 12px;
+      margin-bottom: 12px;
       border-bottom: 1px solid var(--border);
     }
 
     .header-title {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.25em;
-      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
       text-transform: uppercase;
     }
 
@@ -77,9 +84,10 @@
     }
 
     .header-meta {
-      font-size: 9px;
-      letter-spacing: 0.08em;
+      font-size: 12px;
+      letter-spacing: 0.02em;
       color: var(--text-muted);
+      font-weight: 500;
     }
 
     /* ============================================================
@@ -88,9 +96,11 @@
     .dashboard {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: auto auto auto;
-      gap: 1px;
-      background: var(--border-dim);
+      grid-template-rows: auto;
+      grid-auto-rows: auto;
+      grid-auto-flow: row dense;
+      gap: 12px;
+      background: transparent;
     }
 
     /* ============================================================
@@ -98,18 +108,21 @@
     ============================================================ */
     .panel {
       background: var(--surface);
-      padding: 14px 16px;
+      padding: 20px;
       position: relative;
       overflow: hidden;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-dim);
     }
 
     .panel-label {
-      font-size: 8.5px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.2em;
-      color: var(--text-secondary);
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
       text-transform: uppercase;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -122,13 +135,16 @@
       background: var(--border);
     }
 
-    /* Panel placement */
-    .panel-clocks { grid-column: 1 / -1; }
-    .panel-weather { grid-column: 1; }
-    .panel-stock   { grid-column: 2; }
-    .panel-mstime  { grid-column: 3; }
-    .panel-feed    { grid-column: 1 / 3; }
-    .panel-brand   { grid-column: 3; }
+    /* Panel placement — span-based for drag-and-drop reordering */
+    .panel-clocks { grid-column: span 3; }
+    .panel-weather { grid-column: span 1; }
+    .panel-stock   { grid-column: span 1; }
+    .panel-mstime  { grid-column: span 1; }
+    .panel-feed    { grid-column: span 2; }
+    .panel-brand   { grid-column: span 1; }
+    .panel-countdown { grid-column: span 1; }
+    .panel-github    { grid-column: span 2; }
+    .panel-commute   { grid-column: span 3; }
 
     /* ============================================================
        PANEL 1 — CLOCKS
@@ -136,37 +152,40 @@
     .clocks-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border-dim);
+      gap: 12px;
+      background: transparent;
     }
 
     .clock-cell {
       background: var(--surface-alt);
-      padding: 10px 16px 14px;
+      padding: 16px 20px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-dim);
     }
 
     .clock-city {
-      font-size: 8px;
-      letter-spacing: 0.18em;
-      color: var(--text-secondary);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      font-weight: 500;
     }
 
     .clock-time {
       font-size: 38px;
       font-weight: 300;
-      letter-spacing: -0.02em;
+      letter-spacing: -1px;
       color: var(--text-primary);
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
 
     .clock-date {
-      font-size: 9px;
+      font-size: 12px;
       color: var(--text-secondary);
-      margin-top: 5px;
-      letter-spacing: 0.05em;
+      margin-top: 6px;
+      font-weight: 400;
     }
 
     /* ============================================================
@@ -181,10 +200,10 @@
     .weather-glyph {
       font-size: 10.5px;
       line-height: 1.55;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       flex-shrink: 0;
       white-space: pre;
-      font-family: var(--font);
+      font-family: 'IBM Plex Mono', monospace;
     }
 
     .weather-data {
@@ -192,37 +211,39 @@
     }
 
     .weather-temp {
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 300;
       color: var(--text-primary);
       line-height: 1;
       margin-bottom: 6px;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
     }
 
     .weather-temp span {
-      font-size: 14px;
+      font-size: 16px;
       color: var(--text-secondary);
       font-weight: 400;
     }
 
     .weather-desc {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--text-secondary);
-      letter-spacing: 0.05em;
-      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+      margin-bottom: 12px;
       text-transform: uppercase;
+      font-weight: 500;
     }
 
     .weather-detail {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--text-muted);
       line-height: 1.8;
     }
 
     .weather-detail strong {
       color: var(--text-secondary);
-      font-weight: 400;
+      font-weight: 500;
     }
 
     /* ============================================================
@@ -235,45 +256,46 @@
       line-height: 1;
       margin-bottom: 8px;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
     }
 
     .stock-delta {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       letter-spacing: 0.02em;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
-    .stock-delta.positive { color: var(--accent); }
+    .stock-delta.positive { color: var(--green); }
     .stock-delta.negative { color: var(--red); }
     .stock-delta.flat     { color: var(--text-secondary); }
 
     .stock-sparkline {
-      font-size: 10px;
+      font-size: 12px;
       letter-spacing: -0.05em;
       color: var(--text-secondary);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       line-height: 1;
       overflow: hidden;
       white-space: nowrap;
     }
 
     .stock-meta {
-      font-size: 9px;
+      font-size: 12px;
       color: var(--text-muted);
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 4px 16px;
+      gap: 6px 16px;
     }
 
     .stock-meta-item strong {
       color: var(--text-secondary);
       display: block;
-      font-size: 8px;
-      letter-spacing: 0.12em;
-      font-weight: 400;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      font-weight: 500;
       text-transform: uppercase;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
 
     /* ============================================================
@@ -287,7 +309,7 @@
     }
 
     .feed-item {
-      padding: 8px 0;
+      padding: 10px 0;
       border-bottom: 1px solid var(--border-dim);
       display: grid;
       grid-template-columns: 1fr auto;
@@ -300,23 +322,23 @@
     }
 
     .feed-headline {
-      font-size: 11px;
+      font-size: 13px;
       color: var(--text-primary);
       line-height: 1.45;
-      letter-spacing: 0.01em;
       text-decoration: none;
       font-family: var(--font);
+      font-weight: 400;
     }
 
     .feed-headline:hover {
-      color: var(--accent-bright);
+      color: var(--accent);
       text-decoration: underline;
       text-underline-offset: 3px;
       text-decoration-color: var(--accent-dim);
     }
 
     .feed-meta {
-      font-size: 8.5px;
+      font-size: 11px;
       color: var(--text-muted);
       white-space: nowrap;
       text-align: right;
@@ -326,26 +348,28 @@
     .feed-source {
       color: var(--text-secondary);
       display: block;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      font-size: 8px;
+      font-size: 10px;
+      font-weight: 500;
     }
 
     .feed-error {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--text-muted);
-      padding: 8px 0;
+      padding: 10px 0;
       line-height: 1.8;
     }
 
     .feed-error code {
       display: block;
-      font-size: 8.5px;
+      font-size: 11px;
       color: var(--text-muted);
-      margin-top: 6px;
-      padding: 6px 8px;
+      margin-top: 8px;
+      padding: 8px 10px;
       background: var(--surface-alt);
-      border-left: 2px solid var(--border);
+      border-left: 2px solid var(--accent-dim);
+      border-radius: 4px;
     }
 
     /* ============================================================
@@ -357,35 +381,38 @@
       line-height: 1;
       margin-bottom: 4px;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
     }
 
-    .brand-score.positive { color: var(--accent); }
+    .brand-score.positive { color: var(--green); }
     .brand-score.negative { color: var(--red); }
     .brand-score.neutral  { color: var(--text-secondary); }
 
     .brand-verdict {
-      font-size: 9px;
-      letter-spacing: 0.2em;
+      font-size: 11px;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       margin-bottom: 18px;
       font-weight: 600;
     }
 
-    .brand-verdict.positive { color: var(--accent); }
+    .brand-verdict.positive { color: var(--green); }
     .brand-verdict.negative { color: var(--red); }
     .brand-verdict.neutral  { color: var(--text-secondary); }
 
     .brand-meter-track {
-      height: 3px;
+      height: 4px;
       background: var(--border);
       position: relative;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      border-radius: 2px;
     }
 
     .brand-meter-fill {
       height: 100%;
       background: var(--accent);
       transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+      border-radius: 2px;
     }
 
     .brand-meter-fill.negative {
@@ -396,31 +423,33 @@
       position: absolute;
       top: -4px;
       width: 2px;
-      height: 11px;
+      height: 12px;
       background: var(--text-primary);
       transform: translateX(-50%);
       transition: left 0.8s cubic-bezier(0.4,0,0.2,1);
+      border-radius: 1px;
     }
 
     .brand-meter-labels {
       display: flex;
       justify-content: space-between;
-      font-size: 7.5px;
+      font-size: 10px;
       color: var(--text-muted);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       margin-bottom: 16px;
+      font-weight: 500;
     }
 
     .brand-breakdown {
-      font-size: 9px;
+      font-size: 12px;
       color: var(--text-muted);
       line-height: 2;
     }
 
     .brand-breakdown strong {
       color: var(--text-secondary);
-      font-weight: 400;
+      font-weight: 500;
     }
 
     /* ============================================================
@@ -433,6 +462,7 @@
       line-height: 1;
       margin-bottom: 2px;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
     }
 
     .mstime-fy span {
@@ -449,54 +479,57 @@
     }
 
     .mstime-detail {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--text-muted);
       line-height: 2;
     }
 
     .mstime-detail strong {
       color: var(--text-secondary);
-      font-weight: 400;
+      font-weight: 500;
     }
 
     .mstime-progress-track {
-      height: 2px;
+      height: 4px;
       background: var(--border);
-      margin: 12px 0 4px;
+      margin: 12px 0 6px;
       position: relative;
+      border-radius: 2px;
     }
 
     .mstime-progress-fill {
       height: 100%;
-      background: var(--accent-bright);
+      background: var(--accent);
       transition: width 1s ease;
+      border-radius: 2px;
     }
 
     .mstime-progress-label {
       display: flex;
       justify-content: space-between;
-      font-size: 7.5px;
+      font-size: 10px;
       color: var(--text-muted);
-      letter-spacing: 0.06em;
+      font-weight: 500;
     }
 
     /* ============================================================
        FOOTER
     ============================================================ */
     .footer {
-      padding: 8px 2px 0;
+      padding: 12px 4px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid var(--border-dim);
-      margin-top: 1px;
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
     }
 
     .footer-stamp {
-      font-size: 8.5px;
+      font-size: 11px;
       color: var(--text-muted);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
+      font-weight: 500;
     }
 
     .footer-stamp span {
@@ -507,24 +540,232 @@
        UTILITY
     ============================================================ */
     .unavailable {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--text-muted);
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      font-weight: 500;
     }
 
     .dash {
       color: var(--text-muted);
     }
 
-    /* Panels use position:relative for potential absolute children */
+    /* ============================================================
+       DRAG & DROP
+    ============================================================ */
+    .panel-label {
+      cursor: grab;
+    }
+
+    .panel-label:active {
+      cursor: grabbing;
+    }
+
+    .panel-dragging {
+      opacity: 0.35;
+      outline: 2px solid var(--accent-dim);
+      border-radius: var(--radius);
+    }
+
+    .sortable-chosen .panel-label {
+      cursor: grabbing;
+    }
 
     /* ============================================================
-       CURSOR GLOW — text-only color shift near cursor
-       Uses CSS transition for smooth cloudy falloff
+       PANEL 7 — COUNTDOWN
     ============================================================ */
-    .glow-text {
-      transition: color 0.5s ease;
+    .countdown-event {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .countdown-event:last-child {
+      border-bottom: none;
+    }
+
+    .countdown-name {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .countdown-days {
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+    }
+
+    .countdown-days span {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .countdown-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .countdown-past {
+      opacity: 0.35;
+    }
+
+    .countdown-imminent .countdown-days {
+      color: var(--accent);
+    }
+
+    /* ============================================================
+       PANEL 8 — GITHUB TRENDING
+    ============================================================ */
+    .gh-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .gh-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-dim);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    .gh-item:last-child {
+      border-bottom: none;
+    }
+
+    .gh-repo {
+      font-size: 13px;
+      color: var(--accent);
+      line-height: 1.45;
+      text-decoration: none;
+      font-family: var(--font);
+      font-weight: 500;
+    }
+
+    .gh-repo:hover {
+      color: var(--accent-bright);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--accent-dim);
+    }
+
+    .gh-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .gh-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    .gh-stars {
+      color: var(--text-secondary);
+      display: block;
+      font-weight: 500;
+    }
+
+    .gh-lang {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: block;
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       PANEL 9 — COMMUTE
+    ============================================================ */
+    .commute-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: transparent;
+    }
+
+    .commute-dir {
+      background: var(--surface-alt);
+      padding: 16px 20px;
+      transition: opacity 0.3s ease;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-dim);
+    }
+
+    .commute-dir.dimmed {
+      opacity: 0.35;
+    }
+
+    .commute-dir.active .commute-label {
+      color: var(--accent);
+    }
+
+    .commute-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .commute-time {
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+
+    .commute-time span {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .commute-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-top: 6px;
+    }
+
+    .commute-detail strong {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .commute-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .commute-dir.active .commute-arrow {
+      color: var(--accent);
     }
   </style>
 </head>
@@ -542,7 +783,7 @@
     <!-- ====================================================
          PANEL 1: CLOCKS
     ==================================================== -->
-    <div class="panel panel-clocks" style="padding:0;">
+    <div class="panel panel-clocks" data-panel="clocks" style="padding:0;">
       <div style="padding:14px 16px 10px;">
         <div class="panel-label">WORLD CLOCKS</div>
       </div>
@@ -568,7 +809,7 @@
     <!-- ====================================================
          PANEL 2: WEATHER
     ==================================================== -->
-    <div class="panel panel-weather">
+    <div class="panel panel-weather" data-panel="weather">
       <div class="panel-label">REDMOND WX</div>
       <div id="weather-content">
         <div class="weather-main">
@@ -588,7 +829,7 @@
     <!-- ====================================================
          PANEL 3: MSFT STOCK
     ==================================================== -->
-    <div class="panel panel-stock">
+    <div class="panel panel-stock" data-panel="stock">
       <div class="panel-label">MSFT &middot; NASDAQ</div>
       <div id="stock-content">
         <div class="stock-price dash">---.--</div>
@@ -618,7 +859,7 @@
     <!-- ====================================================
          PANEL 6: MICROSOFT TIME (row 2, col 3)
     ==================================================== -->
-    <div class="panel panel-mstime">
+    <div class="panel panel-mstime" data-panel="mstime">
       <div class="panel-label">MICROSOFT TIME</div>
       <div id="mstime-content">
         <div class="mstime-fy"><span>FY</span><span id="ms-fy-year">--</span></div>
@@ -642,7 +883,7 @@
     <!-- ====================================================
          PANEL 4: CHAOS FEED
     ==================================================== -->
-    <div class="panel panel-feed">
+    <div class="panel panel-feed" data-panel="feed">
       <div class="panel-label">CHAOS FEED
         <span style="font-size:8px;letter-spacing:0.05em;color:var(--text-muted);font-weight:400;text-transform:none;" id="feed-refresh-info">AUTO-REFRESH 5MIN</span>
       </div>
@@ -657,7 +898,7 @@
     <!-- ====================================================
          PANEL 5: BRAND HEALTH
     ==================================================== -->
-    <div class="panel panel-brand">
+    <div class="panel panel-brand" data-panel="brand">
       <div class="panel-label">MSFT BRAND PULSE</div>
       <div class="brand-score neutral dash" id="brand-score">--</div>
       <div class="brand-verdict neutral dash" id="brand-verdict">CALCULATING</div>
@@ -675,6 +916,60 @@
         <div><strong>AVG SCORE &nbsp;</strong> <span id="brand-avg">--</span></div>
         <div><strong>POSITIVE &nbsp;&nbsp;</strong> <span id="brand-pos">--</span></div>
         <div><strong>NEGATIVE &nbsp;&nbsp;</strong> <span id="brand-neg">--</span></div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         PANEL 7: COUNTDOWN
+    ==================================================== -->
+    <div class="panel panel-countdown" data-panel="countdown">
+      <div class="panel-label">COUNTDOWN</div>
+      <div id="countdown-content">
+        <div class="countdown-event dash">CALCULATING...</div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         PANEL 8: GITHUB TRENDING
+    ==================================================== -->
+    <div class="panel panel-github" data-panel="github">
+      <div class="panel-label">GITHUB TRENDING
+        <span style="font-size:8px;letter-spacing:0.05em;color:var(--text-muted);font-weight:400;text-transform:none;" id="gh-refresh-info">AUTO-REFRESH 30MIN</span>
+      </div>
+      <ul class="gh-list" id="gh-list">
+        <li class="gh-item">
+          <span class="gh-repo dash">Loading repos...</span>
+          <span class="gh-meta"></span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ====================================================
+         PANEL 9: COMMUTE
+    ==================================================== -->
+    <div class="panel panel-commute" data-panel="commute" style="padding:0;">
+      <div style="padding:14px 16px 10px;">
+        <div class="panel-label">COMMUTE
+          <span style="font-size:8px;letter-spacing:0.05em;color:var(--text-muted);font-weight:400;text-transform:none;" id="commute-refresh-info">AUTO-REFRESH 10MIN</span>
+        </div>
+      </div>
+      <div class="commute-grid" id="commute-content">
+        <div class="commute-dir" id="commute-to-work">
+          <div class="commute-label">HOME → WORK</div>
+          <div class="commute-arrow">→ ONE ESTERRA, REDMOND</div>
+          <div class="commute-time dash" id="commute-work-time">--<span> MIN</span></div>
+          <div class="commute-detail" id="commute-work-detail">
+            <div><strong>DIST &nbsp;</strong> <span id="commute-work-dist">---</span></div>
+          </div>
+        </div>
+        <div class="commute-dir" id="commute-to-home">
+          <div class="commute-label">WORK → HOME</div>
+          <div class="commute-arrow">→ WALLINGFORD, SEATTLE</div>
+          <div class="commute-time dash" id="commute-home-time">--<span> MIN</span></div>
+          <div class="commute-detail" id="commute-home-detail">
+            <div><strong>DIST &nbsp;</strong> <span id="commute-home-dist">---</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1163,95 +1458,208 @@
   }
 
   /* ============================================================
-     CURSOR GLOW — text-only color shift based on proximity
-     Collects all visible text containers once, then on each
-     animation frame lerps toward cursor and recolors nearby text.
-     Only text color changes — background is never touched.
+     PANEL 7: COUNTDOWN — Microsoft Events
+     Key dates: Build, Ignite, Earnings, FY End
   ============================================================ */
-  (() => {
-    const RADIUS   = 400;  // px — how far the glow reaches
-    const EASE     = 0.06; // lerp factor — lower = cloudier drift
-    const GLOW_RGB = [160, 210, 255]; // brighter blue-white
+  const MS_EVENTS = [
+    { name: 'MSFT EARNINGS Q3',    date: '2026-04-28' },
+    { name: 'MICROSOFT BUILD',     date: '2026-05-19' },
+    { name: 'FY26 END',            date: '2026-06-30' },
+    { name: 'MSFT EARNINGS Q4',    date: '2026-07-21' },
+    { name: 'MICROSOFT IGNITE',    date: '2026-11-17' },
+  ];
 
-    let mouseX = -9999, mouseY = -9999;
-    let glowX  = -9999, glowY  = -9999;
-    let active = false;
+  function updateCountdown() {
+    const now = DateTime.now().setZone('America/Los_Angeles').startOf('day');
+    const el  = document.getElementById('countdown-content');
 
-    // Collect all leaf-level text containers
-    const TEXT_SELECTORS = [
-      '.clock-time', '.clock-date', '.clock-city',
-      '.weather-temp', '.weather-desc', '.weather-detail div',
-      '.weather-glyph',
-      '.stock-price', '.stock-delta', '.stock-sparkline',
-      '.stock-meta-item', '.stock-meta-item strong',
-      '.mstime-fy', '.mstime-quarter', '.mstime-detail div',
-      '.mstime-progress-label span',
-      '.feed-headline', '.feed-meta', '.feed-source',
-      '.brand-score', '.brand-verdict', '.brand-breakdown div',
-      '.brand-meter-labels span',
-      '.panel-label',
-      '.header-title', '.header-meta',
-      '.footer-stamp',
-    ];
+    const events = MS_EVENTS.map(e => {
+      const eventDate = DateTime.fromISO(e.date);
+      const diff      = Math.ceil(eventDate.diff(now, 'days').days);
+      return { ...e, diff, eventDate };
+    }).sort((a, b) => a.diff - b.diff);
 
-    const elements = [];
-    TEXT_SELECTORS.forEach(sel => {
-      document.querySelectorAll(sel).forEach(el => {
-        el.classList.add('glow-text');
-        // Cache the original computed color
-        const orig = getComputedStyle(el).color;
-        el._glowOrigColor = orig;
-        elements.push(el);
-      });
-    });
+    el.innerHTML = events.map(e => {
+      let cls = 'countdown-event';
+      if (e.diff < 0)  cls += ' countdown-past';
+      if (e.diff >= 0 && e.diff <= 7) cls += ' countdown-imminent';
 
-    document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      active = true;
-    });
+      const label = e.diff < 0
+        ? `${Math.abs(e.diff)} <span>DAYS AGO</span>`
+        : e.diff === 0
+          ? '<span style="color:var(--accent);font-size:14px;font-weight:600">TODAY</span>'
+          : `${e.diff} <span>DAYS</span>`;
 
-    document.addEventListener('mouseleave', () => {
-      active = false;
-    });
+      return `
+        <div class="${cls}">
+          <div class="countdown-name">${e.name}</div>
+          <div class="countdown-days">${label}</div>
+          <div class="countdown-date">${e.eventDate.toFormat('dd MMM yyyy').toUpperCase()}</div>
+        </div>`;
+    }).join('');
+  }
 
-    function parseRGB(str) {
-      const m = str.match(/\d+/g);
-      return m ? m.slice(0, 3).map(Number) : [0, 0, 0];
+  updateCountdown();
+  // Refresh hourly
+  setInterval(updateCountdown, 60 * 60 * 1000);
+
+  /* ============================================================
+     PANEL 8: GITHUB TRENDING
+     Uses the GitHub Search API (no key needed, 10 req/min)
+  ============================================================ */
+  async function fetchGithubTrending() {
+    const listEl = document.getElementById('gh-list');
+
+    try {
+      // Most starred repos created in the last 7 days
+      const since = DateTime.now().minus({ days: 7 }).toISODate();
+      const res = await fetch(
+        `https://api.github.com/search/repositories?q=created:>${since}&sort=stars&order=desc&per_page=8`,
+        { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+      );
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const repos = data.items || [];
+
+      if (repos.length === 0) throw new Error('No repos returned');
+
+      listEl.innerHTML = repos.map(r => {
+        const stars = r.stargazers_count >= 1000
+          ? (r.stargazers_count / 1000).toFixed(1) + 'K'
+          : r.stargazers_count.toString();
+        const lang = r.language || '';
+        const desc = r.description || '';
+
+        return `
+          <li class="gh-item">
+            <div>
+              <a class="gh-repo" href="${escapeHtml(r.html_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.full_name)}</a>
+              ${desc ? `<div class="gh-desc">${escapeHtml(desc.substring(0, 100))}</div>` : ''}
+            </div>
+            <span class="gh-meta">
+              <span class="gh-stars">\u2605 ${stars}</span>
+              <span class="gh-lang">${escapeHtml(lang)}</span>
+            </span>
+          </li>`;
+      }).join('');
+
+    } catch (e) {
+      listEl.innerHTML = `
+        <li class="gh-item" style="display:block">
+          <div class="feed-error">
+            UNAVAILABLE — ${escapeHtml(e.message).toUpperCase()}
+          </div>
+        </li>`;
+    }
+  }
+
+  fetchGithubTrending();
+  setInterval(fetchGithubTrending, 30 * 60 * 1000); // 30-min refresh
+
+  /* ============================================================
+     PANEL 9: COMMUTE — OSRM Routing
+     Home:  8027 40th Ave NE, Seattle, WA 98115
+     Work:  One Esterra, Redmond, WA 98052
+     Uses open-source OSRM routing (no API key needed).
+     Shows estimated drive time; does not include live traffic.
+  ============================================================ */
+  const COMMUTE_HOME = { lat: 47.6847, lon: -122.2817, label: 'HOME' };
+  const COMMUTE_WORK = { lat: 47.6553, lon: -122.1423, label: 'WORK' };
+
+  async function fetchCommute() {
+    try {
+      // Fetch both directions in parallel
+      const [toWorkRes, toHomeRes] = await Promise.all([
+        fetch(`https://router.project-osrm.org/route/v1/driving/${COMMUTE_HOME.lon},${COMMUTE_HOME.lat};${COMMUTE_WORK.lon},${COMMUTE_WORK.lat}?overview=false`),
+        fetch(`https://router.project-osrm.org/route/v1/driving/${COMMUTE_WORK.lon},${COMMUTE_WORK.lat};${COMMUTE_HOME.lon},${COMMUTE_HOME.lat}?overview=false`),
+      ]);
+
+      if (!toWorkRes.ok || !toHomeRes.ok) throw new Error('Route API error');
+
+      const toWorkData = await toWorkRes.json();
+      const toHomeData = await toHomeRes.json();
+
+      if (toWorkData.code !== 'Ok' || toHomeData.code !== 'Ok') throw new Error('No route found');
+
+      const toWork = toWorkData.routes[0];
+      const toHome = toHomeData.routes[0];
+
+      // Duration in minutes, distance in miles
+      const workMin  = Math.round(toWork.duration / 60);
+      const workMi   = (toWork.distance / 1609.344).toFixed(1);
+      const homeMin  = Math.round(toHome.duration / 60);
+      const homeMi   = (toHome.distance / 1609.344).toFixed(1);
+
+      // Update display
+      document.getElementById('commute-work-time').innerHTML = `${workMin}<span> MIN</span>`;
+      document.getElementById('commute-work-dist').textContent = `${workMi} MI`;
+      document.getElementById('commute-home-time').innerHTML = `${homeMin}<span> MIN</span>`;
+      document.getElementById('commute-home-dist').textContent = `${homeMi} MI`;
+
+    } catch (e) {
+      document.getElementById('commute-work-time').innerHTML = '<span class="unavailable">--</span>';
+      document.getElementById('commute-home-time').innerHTML = '<span class="unavailable">--</span>';
     }
 
-    function lerpColor(orig, target, t) {
-      return orig.map((c, i) => Math.round(c + (target[i] - c) * t));
+    // Highlight active direction based on time of day
+    updateCommuteDirection();
+  }
+
+  function updateCommuteDirection() {
+    const hour = DateTime.now().setZone('America/Los_Angeles').hour;
+    const toWorkEl = document.getElementById('commute-to-work');
+    const toHomeEl = document.getElementById('commute-to-home');
+
+    if (hour < 12) {
+      // Morning — highlight commute to work
+      toWorkEl.className = 'commute-dir active';
+      toHomeEl.className = 'commute-dir dimmed';
+    } else {
+      // Afternoon — highlight commute home
+      toWorkEl.className = 'commute-dir dimmed';
+      toHomeEl.className = 'commute-dir active';
     }
+  }
 
-    function animate() {
-      // Smooth follow — gives the cloudy, drifting lag
-      glowX += (mouseX - glowX) * EASE;
-      glowY += (mouseY - glowY) * EASE;
+  fetchCommute();
+  setInterval(fetchCommute, 10 * 60 * 1000); // 10-min refresh
+  setInterval(updateCommuteDirection, 60 * 1000); // Check direction every minute
 
-      for (let i = 0; i < elements.length; i++) {
-        const el   = elements[i];
-        const rect = el.getBoundingClientRect();
-        const cx   = rect.left + rect.width / 2;
-        const cy   = rect.top + rect.height / 2;
-        const dx   = glowX - cx;
-        const dy   = glowY - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+  /* ============================================================
+     DRAG & DROP — SortableJS
+     Panels can be reordered by dragging the panel header.
+     Layout order persists in localStorage.
+  ============================================================ */
+  (function initDragAndDrop() {
+    const dashboard = document.querySelector('.dashboard');
+    if (!dashboard || typeof Sortable === 'undefined') return;
 
-        if (active && dist < RADIUS) {
-          // Quadratic falloff for a soft, organic feel
-          const t = Math.pow(1 - dist / RADIUS, 2) * 1.0;
-          const origRGB = parseRGB(el._glowOrigColor);
-          const mixed   = lerpColor(origRGB, GLOW_RGB, t);
-          el.style.color = `rgb(${mixed[0]},${mixed[1]},${mixed[2]})`;
-        } else {
-          el.style.color = '';
-        }
+    // Restore saved order
+    const savedOrder = localStorage.getItem('dashboard-order');
+    if (savedOrder) {
+      try {
+        const order = JSON.parse(savedOrder);
+        order.forEach(panelId => {
+          const panel = dashboard.querySelector(`[data-panel="${panelId}"]`);
+          if (panel) dashboard.appendChild(panel);
+        });
+      } catch (e) {
+        // Invalid saved order — ignore
       }
-
-      requestAnimationFrame(animate);
     }
-    animate();
+
+    Sortable.create(dashboard, {
+      handle: '.panel-label',
+      animation: 150,
+      ghostClass: 'panel-dragging',
+      onEnd: function () {
+        // Save new order
+        const panels = dashboard.querySelectorAll('[data-panel]');
+        const order = Array.from(panels).map(p => p.getAttribute('data-panel'));
+        localStorage.setItem('dashboard-order', JSON.stringify(order));
+      },
+    });
   })();
 
   </script>
