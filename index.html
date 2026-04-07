@@ -4,35 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MSFT DASHBOARD</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Fluent 2 uses Segoe UI Variable (Windows system font) — no external font load needed -->
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <style>
     /* ============================================================
-       DESIGN TOKENS — Kraken Design System
+       DESIGN TOKENS — Fluent 2 (Dark Theme)
+       Reference: https://fluent2.microsoft.design
     ============================================================ */
     :root {
-      --bg:            #0d0d11;
-      --surface:       #16161d;
-      --surface-alt:   #1c1c25;
-      --border:        #2a2a36;
-      --border-dim:    #222230;
-      --text-primary:  #e8e8ec;
-      --text-secondary:#9497a9;
-      --text-muted:    #686b82;
-      --accent:        #7b5af5;
-      --accent-bright: #9b7dff;
-      --accent-dim:    rgba(133,91,251,0.20);
-      --green:         #2dd17e;
-      --green-dim:     rgba(45,209,126,0.16);
-      --red:           #f04452;
-      --red-dim:       rgba(240,68,82,0.14);
-      --shadow:        rgba(0,0,0,0.25) 0px 4px 24px;
-      --shadow-micro:  rgba(0,0,0,0.15) 0px 1px 4px;
-      --radius:        12px;
-      --radius-sm:     8px;
-      --font: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --bg:            #1b1a19;  /* colorNeutralBackground1 */
+      --surface:       #292827;  /* colorNeutralBackground3 */
+      --surface-alt:   #323130;  /* colorNeutralBackground4 */
+      --border:        #484644;  /* colorNeutralStroke1 */
+      --border-dim:    #3b3a39;  /* colorNeutralStroke2 */
+      --text-primary:  #ffffff;  /* colorNeutralForeground1 */
+      --text-secondary:#d2d0ce;  /* colorNeutralForeground2 */
+      --text-muted:    #a19f9d;  /* colorNeutralForeground3 */
+      --accent:        #479ef5;  /* colorBrandForeground1 */
+      --accent-bright: #62abf5;  /* colorBrandForeground2 */
+      --accent-dim:    rgba(71,158,245,0.16);
+      --green:         #54b054;  /* colorPaletteGreenForeground1 */
+      --green-dim:     rgba(84,176,84,0.16);
+      --red:           #e37d80;  /* colorPaletteRedForeground1 */
+      --red-dim:       rgba(227,125,128,0.14);
+      --shadow:        rgba(0,0,0,0.36) 0px 2px 16px;
+      --shadow-micro:  rgba(0,0,0,0.24) 0px 1px 4px;
+      --radius:        8px;     /* borderRadiusLarge */
+      --radius-sm:     4px;     /* borderRadiusMedium */
+      --font: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     /* ============================================================
@@ -203,7 +203,7 @@
       color: var(--text-muted);
       flex-shrink: 0;
       white-space: pre;
-      font-family: 'IBM Plex Mono', monospace;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
     }
 
     .weather-data {
